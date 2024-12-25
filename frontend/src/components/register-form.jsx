@@ -21,37 +21,64 @@ export function RegisterForm({ className, ...props }) {
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
   const [userName, setUserName] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [role, setRole] = useState("");
+  const [accountType, setAccountType] = useState("");
 
   const [loading, setLoading] = useState(false);
 
   const handleClick = async () => {
     setLoading(true);
+    let acc_check = accountType ? "personal" : "business";
+
+    if (confirmPassword !== password) {
+      return;
+    }
+
+    const obj = {
+      email,
+      password,
+      fullName,
+      userName,
+      role,
+      accountType: acc_check,
+    };
+
     try {
-      if (!email || !password) {
+      if (
+        !fullName ||
+        !userName ||
+        !email ||
+        !password ||
+        !role ||
+        !accountType
+      ) {
         return alert("All fields are required");
       }
+      const response = await fetch(
+        "http://localhost:8000/api/v1/auth/register",
+        {
+          method: "POST",
+          body: JSON.stringify(obj),
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
+        }
+      );
 
-      const response = await fetch("http://localhost:8000/api/v1/auth/register", {
-        method: "POST",
-        body: JSON.stringify({ email, password }),
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-      });
-
-      // Check for unsuccessful response
+      const responseData = await response.json(); // Parse JSON only once
       if (!response.ok) {
-        const errorData = await response.json();
+        console.error("Error response from server:", responseData);
         setLoading(false);
+        return alert(responseData.message || "Registration failed");
       }
 
-      const data = await response.json();
-      console.log("Login response:", data); // Use the response data as needed
+      console.log("Register User response:", responseData);
       setLoading(false);
       navigate("/");
     } catch (e) {
-      console.error("Error during login:", e);
+      console.error("Error during Register User:", e);
       setLoading(false);
     }
   };
@@ -59,7 +86,7 @@ export function RegisterForm({ className, ...props }) {
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card className="overflow-hidden">
-        <form className="p-6 md:p-8">
+        <div className="p-6 md:p-8">
           <div className="flex flex-col gap-6">
             <div className="flex flex-col items-center text-center">
               <h1 className="text-2xl font-bold">Welcome back</h1>
@@ -70,7 +97,14 @@ export function RegisterForm({ className, ...props }) {
             <div className="grid gap-4 md:grid-cols-2">
               <div className="grid gap-2">
                 <Label htmlFor="name">Full Name</Label>
-                <Input id="name" type="name" placeholder="John Doe" required />
+                <Input
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                  id="name"
+                  type="name"
+                  placeholder="John Doe"
+                  required
+                />
               </div>
               <div className="grid gap-2">
                 <Label htmlFor="username">Username</Label>
@@ -78,6 +112,8 @@ export function RegisterForm({ className, ...props }) {
                   id="username"
                   type="text"
                   placeholder="johndoe"
+                  value={userName}
+                  onChange={(e) => setUserName(e.target.value)}
                   required
                 />
               </div>
@@ -97,6 +133,8 @@ export function RegisterForm({ className, ...props }) {
               <div className="grid gap-2">
                 <Label htmlFor="role">What’s your role?</Label>
                 <Select
+                  value={role}
+                  onValueChange={(e) => setRole(e)}
                   id="role"
                   className="border border-border rounded p-2 focus:outline-none focus:ring focus:ring-primary"
                 >
@@ -106,7 +144,6 @@ export function RegisterForm({ className, ...props }) {
                   <SelectContent>
                     <SelectGroup>
                       <SelectLabel>Yout Role</SelectLabel>
-                      <SelectItem value="pineapple">Pineapple</SelectItem>
                       <SelectItem value="manager">Manager</SelectItem>
                       <SelectItem value="developer">Developer</SelectItem>
                       <SelectItem value="designer">Designer</SelectItem>
@@ -280,6 +317,8 @@ export function RegisterForm({ className, ...props }) {
                 <Input
                   id="confirm-password"
                   type="password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
                   placeholder="xxxxxxxx"
                   required
                 />
@@ -293,6 +332,7 @@ export function RegisterForm({ className, ...props }) {
                     type="radio"
                     name="accountType"
                     value="personal"
+                    onChange={(e) => setAccountType(true)}
                     className="accent-primary"
                     required
                   />
@@ -302,6 +342,7 @@ export function RegisterForm({ className, ...props }) {
                   <input
                     type="radio"
                     name="accountType"
+                    onChange={(e) => setAccountType(false)}
                     value="business"
                     className="accent-primary"
                     required
@@ -310,8 +351,13 @@ export function RegisterForm({ className, ...props }) {
                 </label>
               </div>
             </div>
-            <Button type="submit" className="w-full">
-              Register
+            <Button
+              onClick={handleClick}
+              disabled={loading}
+              type="submit"
+              className="w-full"
+            >
+              {loading ? "Loading..." : "Register"}
             </Button>
             <div className="relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t after:border-border">
               <span className="relative z-10 bg-background px-2 text-muted-foreground">
@@ -354,7 +400,7 @@ export function RegisterForm({ className, ...props }) {
               </NavLink>
             </div>
           </div>
-        </form>
+        </div>
       </Card>
 
       <div className="text-balance text-center text-xs text-muted-foreground [&_a]:underline [&_a]:underline-offset-4 hover:[&_a]:text-primary">

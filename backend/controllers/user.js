@@ -4,10 +4,17 @@ import jwt from "jsonwebtoken";
 
 export const register = async (req, res) => {
   try {
-    const { fullName, userName, email, password } = req.body;
+    const { fullName, userName, email, password, role, accountType } = req.body;
 
     // Check for missing fields
-    if (!fullName || !userName || !email || !password) {
+    if (
+      !fullName ||
+      !userName ||
+      !email ||
+      !password ||
+      !role ||
+      !accountType
+    ) {
       return res.status(400).json({
         message: "All fields are required.",
         success: false,
@@ -53,11 +60,13 @@ export const register = async (req, res) => {
       fullName,
       email,
       password: hashedPassword,
+      role,
+      accountType,
     });
 
     await createUser.save();
 
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
+    const token = jwt.sign({ id: createUser._id }, process.env.JWT_SECRET, {
       expiresIn: "1d",
     });
 

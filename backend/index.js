@@ -7,6 +7,8 @@ dotenv.config();
 import connectDB from "./db/dbConnect.js";
 connectDB();
 import authRoutes from "./routes/auth.js";
+import taskRoutes from "./routes/tasks.js";
+import { isAuthenticate } from "./middlewares/isAuthenticated.js";
 
 const app = express();
 
@@ -24,3 +26,4 @@ app.listen(PORT, () => {
 });
 
 app.use("/api/v1/auth", authRoutes);
+app.use("/api/v1/", taskRoutes);
