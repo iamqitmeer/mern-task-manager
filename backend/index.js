@@ -8,17 +8,18 @@ import connectDB from "./db/dbConnect.js";
 connectDB();
 import authRoutes from "./routes/auth.js";
 import taskRoutes from "./routes/tasks.js";
-import { isAuthenticate } from "./middlewares/isAuthenticated.js";
 
 const app = express();
 
 app.use(express.json());
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: ["http://localhost:3000", "http://localhost:5173"], // Include both ports if necessary
     credentials: true,
   })
 );
+app.use(cookieParser());
+
 const PORT = process.env.PORT || 4000;
 
 app.listen(PORT, () => {

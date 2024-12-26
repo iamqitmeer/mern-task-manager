@@ -41,7 +41,10 @@ export default function Task() {
   }, [tasks]);
 
   const fetchTask = async () => {
-    const res = await fetch("http://localhost:8000/api/v1/task");
+    const res = await fetch("http://localhost:8000/api/v1/task", {
+      method: "GET",
+      credentials: "include",
+    });
     const data = await res.json();
     setTasks(data.tasks);
   };
@@ -65,6 +68,7 @@ export default function Task() {
       headers: {
         "Content-Type": "application/json",
       },
+      credentials: "include",
     });
 
     if (addTask.success) {
@@ -72,6 +76,11 @@ export default function Task() {
     }
 
     setIsDialogOpen(false);
+
+    setTitle("");
+    setDescription("");
+    setPriority("");
+    setCurrentID("");
   };
 
   // Delete Task
@@ -80,6 +89,7 @@ export default function Task() {
     if (confirm("Are you sure you want to delete task?")) {
       await fetch(`http://localhost:8000/api/v1/task/${id}`, {
         method: "DELETE",
+        credentials: "include",
       });
     }
   };
@@ -115,6 +125,7 @@ export default function Task() {
         headers: {
           "Content-Type": "application/json",
         },
+        credentials: "include",
       }
     );
 
@@ -122,6 +133,11 @@ export default function Task() {
       alert("Task Update Succesfully");
     }
 
+    setTitle("");
+    setDescription("");
+    setPriority("");
+    setCurrentID();
+    setIsEdited(false)
     setIsDialogOpen(false);
   };
 
